@@ -1,0 +1,19 @@
+{
+  "name": "catalogo-sirena",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Catálogo estático de productos: HTML, CSS y JavaScript puro, con imágenes en GitHub y posts.json generado automáticamente.",
+  "scripts": {
+    "build": "node tools/generate-posts.mjs",
+    "thumbs": "node tools/generate-thumbs.mjs",
+    "build:all": "node tools/generate-thumbs.mjs && node tools/generate-posts.mjs",
+    "build:pretty": "node tools/generate-posts.mjs --pretty",
+    "dev": "node tools/serve.mjs",
+    "start": "node tools/serve.mjs",
+    "test": "node --test tests/lib.test.mjs tests/generate.test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

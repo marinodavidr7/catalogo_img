@@ -1,0 +1,53 @@
+name: Regenerar posts.json y miniaturas
+
+# Cada vez que subes imágenes nuevas (o cambias manifiestos/nombres), el bot
+# genera las miniaturas que falten y reconstruye data/posts.json, y deja todo
+# commiteado. El sitio en GitHub Pages lo toma en el siguiente despliegue.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "assets/img/**"
+      - "data/manifests/**"
+      - "data/labels.json"
+      - "tools/generate-posts.mjs"
+      - "tools/generate-thumbs.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: generate-posts
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generar miniaturas (incremental)
+        run: node tools/generate-thumbs.mjs
+
+      - name: Generar data/posts.json
+        run: node tools/generate-posts.mjs
+
+      - name: Commit si cambió
+        run: |
+          if [ -z "$(git status --porcelain data/posts.json assets/thumbs)" ]; then
+            echo "Nada que hacer: posts.json y miniaturas ya están al día."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/posts.json assets/thumbs
+          git commit -m "chore: regenerar posts.json y miniaturas"
+          git push

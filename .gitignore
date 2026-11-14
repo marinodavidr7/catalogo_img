@@ -1,0 +1,12 @@
+# Sistema
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+
+# Carpetas que NO se publican en GitHub
+_no-publicar/
+
+# Entorno
+.env
+.env.*
