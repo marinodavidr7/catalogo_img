@@ -326,9 +326,24 @@ async function main() {
 
   if (posts.length === 0) fail(`No se encontraron imagenes dentro de ${opts.img}`);
 
+  // Idempotente: si posts/categorías no cambiaron, conserva la fecha anterior.
+  // Así `npm run build` y la GitHub Action no producen diffs solo por la hora.
+  let generatedAt = new Date().toISOString();
+  try {
+    const previous = JSON.parse(await readFile(opts.out, 'utf8'));
+    if (
+      JSON.stringify(previous.posts) === JSON.stringify(posts) &&
+      JSON.stringify(previous.categories) === JSON.stringify(categories)
+    ) {
+      generatedAt = previous.generatedAt || generatedAt;
+    }
+  } catch {
+    /* no existe todavía: se usa la fecha nueva */
+  }
+
   const data = {
     version: 1,
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     count: posts.length,
     categories,
     posts,
